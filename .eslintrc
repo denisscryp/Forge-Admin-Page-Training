@@ -1,0 +1,20 @@
+{
+  "parserOptions": {
+    "sourceType": "module",
+    "ecmaVersion": 2023,
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "plugins": [
+    "react-hooks",
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "react-hooks/rules-of-hooks": "error"
+  }
+}

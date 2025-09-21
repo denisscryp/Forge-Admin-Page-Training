@@ -1,0 +1,42 @@
+modules:
+  jira:adminPage:
+    - key: forge-admin-page-training-hello-world-admin-page
+      resource: main
+      resolver:
+        function: resolver
+      render: native
+      title: Github Admin App
+  function:
+    - key: resolver
+      handler: index.handler
+    - key: webhook-handler
+      handler: index.webhookHandler
+  webtrigger:
+    - key: github-webhook-handler
+      function: webhook-handler
+resources:
+  - key: main
+    path: ui/index.tsx
+app:
+  runtime:
+    name: nodejs22.x
+    memoryMB: 256
+    architecture: arm64
+  id: ari:cloud:ecosystem::app/8025efb7-f1f8-4511-b90f-870ee47f2a2e
+
+permissions:
+  scopes:
+    - read:jira-work
+    - write:jira-work
+    - read:me
+    - read:jira-user
+    - storage:app
+  external:
+    fetch:
+      backend:
+        - remote: git-api
+remotes:
+  - key: git-api
+    baseUrl: "https://api.github.com"
+    operations:
+      - fetch
