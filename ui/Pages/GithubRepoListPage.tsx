@@ -115,6 +115,7 @@ export const GithubRepoListPage = () => {
   const dataRows = []
   const mergeButton = (owner: string, repo: string, prNumber: number) =>
     <Button appearance={"primary"} onClick={() => handleMerge(owner, repo, prNumber)}>Merge</Button>
+
   for (const repo of data) {
     for (const pr of repo.openPRs) {
       dataRows.push({
