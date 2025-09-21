@@ -9,14 +9,19 @@ interface Issue {
 export default class JiraService {
 
   async getIssue(issueKey: string) {
+    let data: Issue | null = null;
     try {
       const response = await api.asApp().requestJira(route`/rest/api/3/issue/${issueKey}`);
-      const data: Issue = await response.json();
-      return data;
+      if (response.status === 200) {
+        data = await response.json();
+      } else {
+        console.error(`Error getting Jira issue ${issueKey}:`, await response.text())
+      }
     } catch (error) {
       console.error(`Error getting Jira issue ${issueKey}:`, error);
-      return null;
     }
+
+    return data;
   }
 
   async changeIssueStatusToDone(issueKey: string) {

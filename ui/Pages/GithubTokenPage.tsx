@@ -1,36 +1,35 @@
 import {invoke} from "@forge/bridge";
-import {Form, Label, Text, Textfield} from "@forge/react";
-import { useState} from "react";
-import {SerialisableEvent} from "@atlaskit/forge-react-types/src/components/__generated__/types.codegen";
+import {Box, Button, Form, Heading, Inline, Label, Textfield} from "@forge/react";
+import {useState} from "react";
 
 type IProps = {
-  onTokenChange: (token: string) => void;
+  onTokenChange: () => void;
 }
 
 export const GithubTokenPage = ({ onTokenChange }: IProps) => {
   const [tokenValue, setTokenValue] = useState('');
 
-  const handleTokenChange = (event: SerialisableEvent) => {
-    setTokenValue(event.target.value);
-  };
-
   const onSubmit = async () => {
     await invoke('saveToken', { token: tokenValue });
-    onTokenChange(tokenValue);
-  }
+    onTokenChange();
+  };
 
   return (
-    <>
-      <Text>Store your Github API token</Text>
-      <Form onSubmit={onSubmit}>
+    <Box xcss={{maxWidth: 500}}>
+      <Heading size={"medium"}>Store your Github API token</Heading>
+      <Form onSubmit={onSubmit} >
         <Label labelFor={'token'}>Github API token:</Label>
-        <Textfield
-          name="token"
-          value={tokenValue}
-          onChange={handleTokenChange}
-          placeholder="Your token"
-        />
+        <Inline alignBlock={"center"} space={'space.200'}>
+          <Textfield
+            name="token"
+            isCompact
+            value={tokenValue}
+            onChange={(event) => setTokenValue(event.target.value)}
+            placeholder="Your token"
+          />
+          <Button type={'submit'} appearance={"primary"} onClick={onSubmit}>Save</Button>
+        </Inline>
       </Form>
-    </>
+    </Box>
     );
 };

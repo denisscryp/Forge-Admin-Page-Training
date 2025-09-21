@@ -1,27 +1,7 @@
 import {useEffect, useState} from "react";
 import {invoke} from "@forge/bridge";
-import {Button, Heading, Link, SectionMessage, Text, DynamicTable} from "@forge/react";
-
-type JiraIssue = {
-  key: string;
-  self: string;
-}
-
-type PullRequest = {
-  id: number;
-  title: string;
-  url: string;
-  number: number;
-  jiraIssue: JiraIssue | null;
-}
-
-type RepositoryData = {
-  name: string;
-  language: string;
-  url: string;
-  owner: string;
-  openPRs: PullRequest[];
-}
+import {Button, Heading, Link, SectionMessage, Text, DynamicTable, Box} from "@forge/react";
+import {RepositoryData} from "../common/interfaces";
 
 const head = {
   cells: [
@@ -61,22 +41,26 @@ const head = {
 export const GithubRepoListPage = () => {
   const [data, setData] = useState<RepositoryData[] | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string| null>(null);
+  const [success, setSuccess] = useState<string| null>(null);
 
   const fetchData = async () => {
     try {
-      const result: any = await invoke('getGitHubAndJiraData');
+      const result = await invoke('getGitHubAndJiraData');
 
-      if (result && result.error) {
-        setError(result.error);
+      if (result && (result as {error: string}).error) {
+        setError((result as {error: string}).error);
+        setSuccess(null);
         setData(null);
       } else {
         setData(result as RepositoryData[]);
         setError(null);
+        setSuccess(null);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
-      setError('Failed to load data. Make sure your GitHub token is valid.');
+      setError('Failed to load data.');
+      setSuccess(null);
       setData(null);
     } finally {
       setLoading(false);
@@ -91,7 +75,9 @@ export const GithubRepoListPage = () => {
     setLoading(true)
     try {
       await invoke('mergePullRequest', {owner, repo, prNumber});
+      setSuccess("Merged pull request");
     } catch (error) {
+      setLoading(false)
       setError('Failed to Merge Pull Request');
       console.error(error);
     }
@@ -99,12 +85,21 @@ export const GithubRepoListPage = () => {
   }
 
   if (loading) {
-    return <Text>Loading...</Text>;
+    return (
+      <>
+        <Text>Loading...</Text>
+        {success && (
+          <SectionMessage title="Success" appearance="success">
+            <Text>{success}</Text>
+          </SectionMessage>
+        )}
+      </>
+    );
   }
 
   if (error) {
     return (
-      <SectionMessage title="Error" appearance="warning">
+      <SectionMessage title="Error" appearance="error">
         <Text>{error}</Text>
       </SectionMessage>
     );
@@ -118,7 +113,8 @@ export const GithubRepoListPage = () => {
     );
   }
   const dataRows = []
-  const mergeButton = (owner: string, repo: string, prNumber: number) => <Button onClick={() => handleMerge(owner, repo, prNumber)}>Merge</Button>
+  const mergeButton = (owner: string, repo: string, prNumber: number) =>
+    <Button appearance={"primary"} onClick={() => handleMerge(owner, repo, prNumber)}>Merge</Button>
   for (const repo of data) {
     for (const pr of repo.openPRs) {
       dataRows.push({
@@ -134,11 +130,13 @@ export const GithubRepoListPage = () => {
     }
   }
 
-  return <>
-    <Heading size="large">Pull Requests:</Heading>
-    <DynamicTable
-      head={head}
-      rows={dataRows}
-    />
-  </>;
+  return (
+    <Box xcss={{maxWidth: 900}}>
+      <Heading size="medium">Pull Requests:</Heading>
+      <DynamicTable
+        head={head}
+        rows={dataRows}
+      />
+    </Box>
+  );
 }

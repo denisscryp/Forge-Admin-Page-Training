@@ -10,8 +10,8 @@ const App = () => {
   useEffect(() => {
     const checkToken = async () => {
       try {
-        const { token }  = await invoke<{ token: string}>("getToken");
-        if (token) {
+        const { tokenExists }  = await invoke<{ tokenExists: boolean}>("hasToken");
+        if (tokenExists) {
           setTokenExists(true);
         }
       } catch (error) {

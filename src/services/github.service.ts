@@ -20,19 +20,19 @@ interface PullRequest {
 export default class GitHubService {
 
   async getRepositories() {
-    return this.callGithubApi<Repository[]>('/user/repos');
+    return this.request<Repository[]>('/user/repos');
   }
 
   async getPullRequests(owner: string, repo: string) {
-    return this.callGithubApi<PullRequest[]>(`/repos/${owner}/${repo}/pulls?state=open`);
+    return this.request<PullRequest[]>(`/repos/${owner}/${repo}/pulls?state=open`);
   }
 
   async mergePullRequest(owner: string, repo: string, pullNumber: number): Promise<{ success: boolean }> {
-    return this.callGithubApi<{ success: boolean }>(`/repos/${owner}/${repo}/pulls/${pullNumber}/merge`, 'PUT');
+    return this.request<{ success: boolean }>(`/repos/${owner}/${repo}/pulls/${pullNumber}/merge`, 'PUT');
   }
 
-  private async callGithubApi<T>(url: string, method: string = 'GET', body: object | null = null): Promise<T> {
-    const token = await storage.get('github-token');
+  private async request<T>(url: string, method: string = 'GET', body: object | null = null): Promise<T> {
+    const token = await storage.getSecret('github-token');
 
     if (!token) {
       throw new Error('GitHub token not found in storage.');

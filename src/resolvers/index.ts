@@ -34,13 +34,13 @@ resolver.define('saveToken', async ({ payload }) => {
   if (!token) {
     return { success: false };
   }
-  await storage.set('github-token', token);
+  await storage.setSecret('github-token', token);
   return { success: true };
 });
 
-resolver.define('getToken', async () => {
-  const token = await storage.get('github-token');
-  return { token };
+resolver.define('hasToken', async () => {
+  const token = await storage.getSecret('github-token');
+  return { tokenExists: typeof token === 'string' };
 });
 
 export async function webhookHandler(event: { body: string }) {

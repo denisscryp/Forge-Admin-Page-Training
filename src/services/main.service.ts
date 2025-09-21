@@ -9,38 +9,26 @@ export default class MainService {
   ) {}
 
   async getGitHubAndJiraData() {
-    const token = await storage.get('github-token');
+    const token = await storage.getSecret('github-token');
 
     if (!token) {
-      return { error: 'GitHub token not set. Please go to the Auth screen.' };
+      return { error: 'GitHub token not set' };
     }
 
     try {
       const repositories = await this.githubService.getRepositories();
-      console.log(repositories.map(({name, owner, language, html_url}) => ({
-        name,
-        owner,
-        language,
-        html_url,
-      })));
 
       const repoData = await Promise.all(repositories.map(async (repo) => {
         const pullRequests = await this.githubService.getPullRequests(repo.owner.login, repo.name);
-        console.log('pullRequests', pullRequests.map(({title, head}) => ({
-          title,
-          headr: head?.ref
-        })));
 
         const openPRs = await Promise.all(pullRequests.map(async (pr) => {
           const jiraKeyMatch = pr?.title?.match(/([A-Z]+-\d+)/) || pr?.head?.ref?.match(/([A-Z]+-\d+)/);
 
           const jiraKey = jiraKeyMatch ? jiraKeyMatch[1] : null;
-          console.log('jira', jiraKey);
 
           let jiraIssue = null;
           if (jiraKey) {
             jiraIssue = await this.jiraService.getIssue(jiraKey);
-            console.log(jiraIssue);
           }
 
           return {
@@ -62,7 +50,6 @@ export default class MainService {
       }));
 
       return repoData.filter(repo => repo.openPRs.length > 0);
-
     } catch (error: unknown) {
       console.error('Error fetching GitHub data:', error);
       return { error: (error as Error).message };

@@ -23,7 +23,6 @@ app:
     memoryMB: 256
     architecture: arm64
   id: ari:cloud:ecosystem::app/8025efb7-f1f8-4511-b90f-870ee47f2a2e
-
 permissions:
   scopes:
     - read:jira-work
