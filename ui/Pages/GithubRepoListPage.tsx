@@ -6,24 +6,14 @@ import {RepositoryData} from "../common/interfaces";
 const head = {
   cells: [
     {
-      key: 'repo',
-      content: 'Repo',
-      width: 20,
-    },
-    {
-      key: 'lang',
-      content: 'Languages',
-      width: 20,
-    },
-    {
       key: 'github',
       content: 'GitHub PR#',
-      width: 10,
+      width: 20,
     },
     {
       key: 'title',
       content: 'PR Title',
-      width: 40,
+      width: 60,
     },
     {
       key: 'jira',
@@ -33,7 +23,7 @@ const head = {
     {
       key: 'action',
       content: 'Action',
-      width: 30,
+      width: 20,
     },
   ],
 };
@@ -112,16 +102,15 @@ export const GithubRepoListPage = () => {
       </SectionMessage>
     );
   }
-  const dataRows = []
+  const repos = [];
   const mergeButton = (owner: string, repo: string, prNumber: number) =>
     <Button appearance={"primary"} onClick={() => handleMerge(owner, repo, prNumber)}>Merge</Button>
 
   for (const repo of data) {
+    const dataRows = []
     for (const pr of repo.openPRs) {
       dataRows.push({
         cells: [
-          { key: 'repo', content: <Link href={repo.url}>{repo.name}</Link> },
-          { key: 'lang', content: repo.language },
           { key: 'github', content: <Link href={pr.url}>#{pr.number}</Link> },
           { key: 'title', content: pr.title },
           { key: 'jira', content: pr.jiraIssue ? <Link href={pr.jiraIssue.self}>{pr.jiraIssue.key}</Link> : null },
@@ -129,15 +118,28 @@ export const GithubRepoListPage = () => {
         ]
       })
     }
+
+    repos.push({
+      repo: <Link href={repo.url}>{repo.name}</Link> ,
+      language: repo.language,
+      dataRows,
+    });
   }
 
   return (
-    <Box xcss={{maxWidth: 900}}>
+    <Box xcss={{maxWidth: 700}}>
       <Heading size="medium">Pull Requests:</Heading>
-      <DynamicTable
-        head={head}
-        rows={dataRows}
-      />
+      {repos.map((repo, index) => (
+        <Box key={index} xcss={{ backgroundColor: 'color.background.neutral', padding: 'space.200', marginTop: 'space.200' }}>
+          <Text >Repository: {repo.repo} Language: {repo.language}</Text>
+          <Box key={index} xcss={{ marginTop: 'space.200' }}>
+            <DynamicTable
+              head={head}
+              rows={repo.dataRows}
+            />
+          </Box>
+        </Box>
+      ))}
     </Box>
   );
 }
